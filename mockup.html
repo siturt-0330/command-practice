@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ショートカット道場 モックアップ</title>
+<style>
+:root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f8;
+  --text: #1c2233;
+  --muted: #667089;
+  --border: #dde2ef;
+  --accent: #3b6cf6;
+  --accent-soft: #e5ecff;
+  --ok: #17a05d;
+  --ok-soft: #ddf5e8;
+  --ng: #e04a4a;
+  --ng-soft: #fde6e6;
+  --warn: #b7791f;
+  --warn-soft: #fff3d6;
+  --key-bg: #fbfcff;
+  --key-shadow: #c9d0e3;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11141d; --surface: #1a1f2c; --surface-2: #232938; --text: #e8ebf5; --muted: #98a1ba;
+    --border: #2d3447; --accent: #6b92ff; --accent-soft: #232f55; --ok: #3ccf86; --ok-soft: #173a29;
+    --ng: #ff7777; --ng-soft: #432024; --warn: #f0b955; --warn-soft: #3b2f14;
+    --key-bg: #262c3d; --key-shadow: #0c0f17;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11141d; --surface: #1a1f2c; --surface-2: #232938; --text: #e8ebf5; --muted: #98a1ba;
+  --border: #2d3447; --accent: #6b92ff; --accent-soft: #232f55; --ok: #3ccf86; --ok-soft: #173a29;
+  --ng: #ff7777; --ng-soft: #432024; --warn: #f0b955; --warn-soft: #3b2f14;
+  --key-bg: #262c3d; --key-shadow: #0c0f17;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+.app { max-width: 1080px; margin: 0 auto; padding: 16px; }
+
+/* header */
+.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.logo { font-weight: 800; font-size: 20px; letter-spacing: .02em; display: flex; align-items: center; gap: 8px; }
+.logo .mark { background: var(--accent); color: #fff; width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center; font-size: 16px; }
+.tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); padding: 4px; border-radius: 999px; margin-left: auto; }
+.tab { border: 0; background: transparent; padding: 7px 16px; border-radius: 999px; color: var(--muted); font-weight: 600; font-size: 14px; }
+.tab[aria-selected="true"] { background: var(--accent); color: #fff; }
+.theme { border: 1px solid var(--border); background: var(--surface); border-radius: 999px; width: 38px; height: 38px; }
+
+.view { display: none; }
+.view.active { display: block; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+
+/* ---------- select view ---------- */
+.summary { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 14px 16px; margin-bottom: 14px; }
+.summary .stat { display: flex; flex-direction: column; min-width: 90px; }
+.summary .stat b { font-size: 22px; line-height: 1.2; }
+.summary .stat span { font-size: 12px; color: var(--muted); }
+.summary .spacer { flex: 1; }
+.btn { border: 1px solid var(--border); background: var(--surface); padding: 9px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ok { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.btn.sm { padding: 6px 11px; font-size: 13px; border-radius: 8px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.layout { display: grid; grid-template-columns: 250px 1fr; gap: 14px; align-items: start; }
+.cats { padding: 8px; position: sticky; top: 12px; }
+.cat { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; text-align: left; padding: 9px 10px; border-radius: 10px; }
+.cat:hover { background: var(--surface-2); }
+.cat[aria-current="true"] { background: var(--accent-soft); }
+.cat .name { flex: 1; font-weight: 600; font-size: 14px; }
+.cat .count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cat .bar { height: 4px; border-radius: 4px; background: var(--border); overflow: hidden; margin-top: 4px; }
+.cat .bar i { display: block; height: 100%; background: var(--ok); }
+.cat .col { flex: 1; min-width: 0; }
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex: none; }
+
+.list-head { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+.list-head h2 { margin: 0; font-size: 17px; margin-right: auto; }
+.search { border: 1px solid var(--border); background: var(--surface-2); color: var(--text); padding: 7px 12px; border-radius: 9px; font: inherit; font-size: 14px; min-width: 180px; }
+.switch { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.items { list-style: none; margin: 0; padding: 4px; }
+.item { display: grid; grid-template-columns: 22px 1fr auto auto; gap: 12px; align-items: center; padding: 10px; border-radius: 10px; }
+.item:hover { background: var(--surface-2); }
+.item .label { font-size: 14px; }
+.item .label small { display: block; color: var(--muted); font-size: 12px; }
+.item.off .label, .item.off .keys { opacity: .42; }
+.badge { font-size: 12px; padding: 2px 9px; border-radius: 999px; background: var(--ok-soft); color: var(--ok); font-weight: 700; white-space: nowrap; }
+.badge.miss { background: var(--ng-soft); color: var(--ng); }
+.master-btn { border: 1px solid var(--border); background: transparent; border-radius: 8px; padding: 4px 10px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.master-btn:hover { border-color: var(--ok); color: var(--ok); }
+.master-btn.on { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); font-weight: 700; }
+
+/* keycaps */
+.keys { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.key {
+  display: inline-block; min-width: 28px; text-align: center; padding: 2px 8px; font-size: 12px; font-weight: 700;
+  background: var(--key-bg); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 7px;
+  box-shadow: 0 1px 0 var(--key-shadow); font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+.keys .plus, .keys .arrow { color: var(--muted); font-size: 12px; }
+.key.big { font-size: 22px; padding: 10px 18px; min-width: 56px; border-radius: 12px; border-bottom-width: 4px; }
+.key.empty { color: var(--muted); border-style: dashed; background: transparent; box-shadow: none; }
+.key.hit { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.key.miss { background: var(--ng-soft); border-color: var(--ng); color: var(--ng); }
+
+/* ---------- practice view ---------- */
+.practice-wrap { max-width: 720px; margin: 0 auto; }
+.progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
+.progress { flex: 1; height: 8px; border-radius: 8px; background: var(--border); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .3s; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.chip { font-size: 12px; background: var(--surface); border: 1px solid var(--border); padding: 3px 11px; border-radius: 999px; color: var(--muted); }
+.chip b { color: var(--text); }
+.quiz { padding: 28px 22px 22px; text-align: center; transition: background .2s, border-color .2s; }
+.quiz.ok { background: var(--ok-soft); border-color: var(--ok); }
+.quiz.ng { animation: shake .3s; border-color: var(--ng); }
+@keyframes shake { 25% { transform: translateX(-6px);} 75% { transform: translateX(6px);} }
+.quiz .cat-tag { display: inline-block; font-size: 12px; background: var(--accent-soft); color: var(--accent); font-weight: 700; padding: 2px 11px; border-radius: 999px; }
+.quiz .q { font-size: 24px; font-weight: 800; margin: 14px 0 4px; }
+.quiz .note { font-size: 13px; color: var(--muted); min-height: 20px; }
+.answer-area { margin: 22px 0 8px; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.answer-area .keys { gap: 8px; }
+.answer-area .keys .plus { font-size: 20px; }
+.feedback { min-height: 26px; font-weight: 700; font-size: 15px; }
+.feedback.ok { color: var(--ok); }
+.feedback.ng { color: var(--ng); }
+.feedback.hint { color: var(--warn); }
+.actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+.hintbox { margin-top: 12px; font-size: 12px; color: var(--muted); background: var(--warn-soft); border-radius: 10px; padding: 9px 12px; text-align: left; }
+.hintbox b { color: var(--warn); }
+.empty-state { text-align: center; padding: 48px 20px; }
+.empty-state h2 { margin: 0 0 6px; }
+
+/* ---------- result view ---------- */
+.result { max-width: 720px; margin: 0 auto; padding: 24px; }
+.result h2 { margin: 0 0 4px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0; }
+.grid3 .cell { background: var(--surface-2); border-radius: 12px; padding: 14px; text-align: center; }
+.grid3 .cell b { font-size: 28px; display: block; line-height: 1.2; }
+.grid3 .cell span { font-size: 12px; color: var(--muted); }
+.result h3 { font-size: 15px; margin: 18px 0 6px; }
+.misslist { list-style: none; margin: 0; padding: 0; }
+.misslist li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.misslist li .label { flex: 1; }
+.note-box { font-size: 12px; color: var(--muted); margin-top: 18px; }
+
+.mock-note { margin-top: 18px; font-size: 12px; color: var(--muted); text-align: center; }
+
+@media (max-width: 760px) {
+  .layout { grid-template-columns: 1fr; }
+  .cats { position: static; display: flex; overflow-x: auto; gap: 4px; padding: 6px; }
+  .cat { flex: none; width: auto; }
+  .cat .bar, .cat .count { display: none; }
+  .item { grid-template-columns: 22px 1fr; }
+  .item .keys, .item .master-btn, .item .badge { grid-column: 2; justify-self: start; }
+  .tabs { margin-left: 0; width: 100%; justify-content: space-between; }
+  .tab { flex: 1; padding: 7px 8px; }
+  .quiz .q { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo"><span class="mark">⌘</span>ショートカット道場</div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-view="select" aria-selected="true">① 項目を選ぶ</button>
+      <button class="tab" role="tab" data-view="practice" aria-selected="false">② 練習する</button>
+      <button class="tab" role="tab" data-view="result" aria-selected="false">③ 結果</button>
+    </nav>
+    <button class="theme" id="theme" title="テーマ切替" aria-label="テーマ切替">◐</button>
+  </header>
+
+  <!-- ===== 1. select ===== -->
+  <section class="view active" id="view-select">
+    <div class="card summary">
+      <div class="stat"><b id="sum-total">0</b><span>全ショートカット</span></div>
+      <div class="stat"><b id="sum-active">0</b><span>練習対象</span></div>
+      <div class="stat"><b id="sum-master">0</b><span>習得済み（除外）</span></div>
+      <div class="spacer"></div>
+      <label class="switch"><input type="checkbox" id="opt-skip-master" checked> 習得済みは出題しない</label>
+      <label class="switch"><input type="checkbox" id="opt-shuffle" checked> シャッフル</label>
+      <button class="btn primary" id="start">▶ この設定で練習開始</button>
+    </div>
+
+    <div class="layout">
+      <aside class="card cats" id="cats"></aside>
+      <main class="card">
+        <div class="list-head">
+          <h2 id="list-title"></h2>
+          <input class="search" id="search" type="search" placeholder="操作名・キーで検索">
+          <button class="btn sm" id="all-on">すべて対象</button>
+          <button class="btn sm" id="all-off">すべて外す</button>
+        </div>
+        <ul class="items" id="items"></ul>
+      </main>
+    </div>
+    <p class="mock-note">☑ ＝ 練習に出す　／　「習得済みにする」を押すとその項目を練習から外せます（いつでも戻せます）</p>
+  </section>
+
+  <!-- ===== 2. practice ===== -->
+  <section class="view" id="view-practice">
+    <div class="practice-wrap" id="practice"></div>
+  </section>
+
+  <!-- ===== 3. result ===== -->
+  <section class="view" id="view-result">
+    <div class="card result" id="result"></div>
+  </section>
+</div>
+
+<script>
+/* ---------- data (モック用に代表的な項目のみ) ---------- */
+// k: "Ctrl+Shift+T" = 同時押し / "Alt>H>V>T" = 順番に押す
+const DATA = [
+  { cat: "Windows", items: [
+    ["スタートメニューを表示する","Win"],["デスクトップを表示する","Win+D"],["設定画面を表示する","Win+I"],
+    ["検索を起動する","Win+S"],["クイック設定を表示する","Win+A"],["ウィジェットを表示する","Win+W"],
+    ["通知センターと予定表を表示する","Win+N"],["アプリやウィンドウを切り替える","Alt+Tab"],
+    ["タスクビューを表示する","Win+Tab"],["仮想デスクトップを追加する","Win+Ctrl+D"],
+    ["仮想デスクトップを閉じる","Win+Ctrl+F4"],["タスクバーからアプリを起動する","Win+1","Win+1～0"],
+    ["操作を元に戻す","Ctrl+Z"],["元に戻した操作をやり直す","Ctrl+Y"],["すべての項目を選択する","Ctrl+A"],
+    ["項目を切り取る","Ctrl+X"],["項目をコピーする","Ctrl+C"],["項目を貼り付ける","Ctrl+V"],
+    ["ファイルを保存する","Ctrl+S"],["クリップボードの履歴を表示する","Win+V"],["ファイルを印刷する","Ctrl+P"],
+    ["IMEを切り替える","Win+Space"],["音声入力を起動する","Win+H"],["全角カタカナに変換する","F7"],
+    ["絵文字パネルを開く","Win+."],["エクスプローラーを起動する","Win+E"],["項目の名前を変更する","F2"],
+    ["新しいフォルダーを作成する","Ctrl+Shift+N"],["親フォルダーに移動する","Alt+↑"],
+    ["項目を完全に削除する","Shift+Delete"],["ウィンドウを閉じる","Alt+F4"],
+    ["すべてのウィンドウを最小化する","Win+M"],["スナップレイアウトを表示する","Win+Z"],
+    ["指定した範囲のスクリーンショットを撮影する","Win+Shift+S"],["［ファイル名を指定して実行］を表示する","Win+R"],
+    ["［タスクマネージャー］を表示する","Ctrl+Shift+Esc"],["パソコンをロックする","Win+L"],
+    ["クイックリンクメニューを表示する","Win+X"],["ウィンドウを左半分に合わせる","Win+←"]
+  ]},
+  { cat: "Chrome・Edge", items: [
+    ["新しいタブを開く","Ctrl+T"],["最後に閉じたタブを再度開く","Ctrl+Shift+T"],["シークレットウィンドウを開く","Ctrl+Shift+N"],
+    ["アドレスバーを選択する","F6"],["アドレスバーで検索を開始する","Ctrl+E"],["履歴画面を表示する","Ctrl+H"],
+    ["閲覧データを消去する","Ctrl+Shift+Delete"],["ダウンロード画面を表示する","Ctrl+J"],
+    ["ページをブックマークする","Ctrl+D"],["デベロッパーツールを開く","Ctrl+Shift+I","F12 でも可"],
+    ["HTMLソースコードを表示する","Ctrl+U"],["ページを元の倍率に戻す","Ctrl+0"],["ページを再読み込みする","F5"],
+    ["ページ内を検索する","F3"],["前のページを表示する","Alt+←"]
+  ]},
+  { cat: "Word", items: [
+    ["リボンを表示する","Ctrl+F1"],["文書の先頭に移動する","Ctrl+Home"],["特定のページに移動する","Ctrl+G"],
+    ["改ページ記号を入力する","Ctrl+Enter"],["太字に設定する","Ctrl+B"],["斜体に設定する","Ctrl+I"],
+    ["下線を引く","Ctrl+U"],["文字を中央揃えにする","Ctrl+E"],["文字を右揃えにする","Ctrl+R"],
+    ["箇条書きに設定する","Ctrl+Shift+L"],["書式なしで文字を貼り付ける","Alt>H>V>T"],
+    ["文書内を検索する","Ctrl+F"],["置換を実行する","Ctrl+H"],["文字数のカウント","Ctrl+Shift+G"]
+  ]},
+  { cat: "Excel", items: [
+    ["セル内のデータを編集する","F2"],["同じデータを複数のセルに入力する","Ctrl+Enter"],["上のセルのデータをコピーする","Ctrl+D"],
+    ["フラッシュフィルを利用する","Ctrl+E"],["セル内で改行する","Alt+Enter"],["合計を入力する","Alt+Shift+="],
+    ["セルA1に移動する","Ctrl+Home"],["表の最後のセルに移動する","Ctrl+End"],["列全体を選択する","Ctrl+Space"],
+    ["行全体を選択する","Shift+Space"],["セルの書式設定を表示する","Ctrl+1"],["操作を繰り返す","F4"],
+    ["表をテーブルに変換する","Ctrl+T"],["フィルターを設定する","Ctrl+Shift+L"],["ワークシートを追加する","Shift+F11"]
+  ]},
+  { cat: "PowerPoint", items: [
+    ["新しいスライドを追加する","Ctrl+M"],["スライドやオブジェクトを複製する","Ctrl+D"],["スライドショーを開始する","F5"],
+    ["複数のオブジェクトをグループ化する","Ctrl+G"],["領域（ペイン）間を移動する","F6"],
+    ["グリッドの表示を切り替える","Shift+F9"],["スライドショーを中断する","B"],["マウスポインターをペンに変更する","Ctrl+P"]
+  ]},
+  { cat: "Outlook", items: [
+    ["新しいメールを作成する","Ctrl+Shift+M"],["メールに返信する","Ctrl+R"],["メールを転送する","Ctrl+F"],
+    ["新着メールを確認する","Ctrl+M"],["メールを削除する","Ctrl+D"],["メールを未読にする","Ctrl+U"],
+    ["予定を作成する","Ctrl+Shift+A"],["タスクを追加する","Ctrl+Shift+K"],["連絡先を追加する","Ctrl+Shift+C"]
+  ]},
+  { cat: "Gmail・カレンダー", items: [
+    ["新しいメールを作成する","C"],["メールに返信する","R"],["メールを全員に返信する","A"],["メールを転送する","F"],
+    ["メールを送信する","Ctrl+Enter"],["スレッドをアーカイブする","E"],["スレッドをミュートする","M"],
+    ["受信トレイを表示する","G>I"],["下書きを表示する","G>D"],["メールや予定を検索する","/"],
+    ["「月」ビューに切り替える","M"],["今日のカレンダーに戻る","T"]
+  ]}
+];
+
+/* ---------- state ---------- */
+const items = [];
+DATA.forEach((c, ci) => c.items.forEach((it, ii) => items.push({
+  id: ci + "-" + ii, ci, cat: c.cat, q: it[0], k: it[1], note: it[2] || "",
+  on: true, mastered: false, miss: 0
+})));
+// デモ用: 一部を最初から習得済みに
+["0-12","0-14","0-15","0-16","0-17","1-0","2-4"].forEach(id => { const x = items.find(i => i.id === id); if (x) { x.mastered = true; x.on = true; } });
+
+let curCat = 0;
+let query = "";
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const LABEL = { Win: "⊞ Windows", Ctrl: "Ctrl", Alt: "Alt", Shift: "Shift" };
+function keysHTML(k, cls = "") {
+  const seq = k.includes(">");
+  const parts = k.split(seq ? ">" : "+");
+  return '<span class="keys">' + parts.map(p => '<span class="key ' + cls + '">' + esc(LABEL[p] || p) + "</span>")
+    .join(seq ? '<span class="arrow">→</span>' : '<span class="plus">+</span>') + "</span>";
+}
+
+/* ---------- tabs ---------- */
+function show(view) {
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + view));
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.view === view));
+  if (view === "practice") renderPractice();
+  if (view === "result") renderResult();
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => show(t.dataset.view));
+$("#theme").onclick = () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+};
+
+/* ---------- select view ---------- */
+const isActive = i => i.on && !(i.mastered && $("#opt-skip-master").checked);
+
+function renderSelect() {
+  // summary
+  $("#sum-total").textContent = items.length;
+  $("#sum-active").textContent = items.filter(isActive).length;
+  $("#sum-master").textContent = items.filter(i => i.mastered).length;
+
+  // categories
+  $("#cats").innerHTML = DATA.map((c, ci) => {
+    const list = items.filter(i => i.ci === ci);
+    const on = list.filter(i => i.on).length;
+    const m = list.filter(i => i.mastered).length;
+    return '<button class="cat" data-ci="' + ci + '" aria-current="' + (ci === curCat) + '">' +
+      '<input type="checkbox" data-catcheck="' + ci + '" ' + (on === list.length ? "checked" : "") + ' title="カテゴリ全体を出題対象にする">' +
+      '<span class="col"><span class="name">' + esc(c.cat) + '</span><div class="bar"><i style="width:' + (m / list.length * 100) + '%"></i></div></span>' +
+      '<span class="count">' + m + "/" + list.length + "</span></button>";
+  }).join("");
+  document.querySelectorAll(".cat").forEach(b => {
+    b.onclick = e => {
+      if (e.target.matches("input")) return;
+      curCat = +b.dataset.ci; renderSelect();
+    };
+  });
+  document.querySelectorAll("[data-catcheck]").forEach(cb => {
+    cb.indeterminate = (() => { const l = items.filter(i => i.ci === +cb.dataset.catcheck); const n = l.filter(i => i.on).length; return n > 0 && n < l.length; })();
+    cb.onchange = () => { items.filter(i => i.ci === +cb.dataset.catcheck).forEach(i => i.on = cb.checked); renderSelect(); };
+  });
+
+  // list
+  $("#list-title").textContent = DATA[curCat].cat;
+  const q = query.trim().toLowerCase();
+  const list = items.filter(i => i.ci === curCat && (!q || i.q.toLowerCase().includes(q) || i.k.toLowerCase().includes(q)));
+  $("#items").innerHTML = list.length ? list.map(i =>
+    '<li class="item ' + (isActive(i) ? "" : "off") + '">' +
+    '<input type="checkbox" data-on="' + i.id + '" ' + (i.on ? "checked" : "") + ">" +
+    '<span class="label">' + esc(i.q) + (i.note ? "<small>" + esc(i.note) + "</small>" : "") + "</span>" +
+    keysHTML(i.k) +
+    (i.miss ? '<span class="badge miss">ミス ' + i.miss + "</span>" : "") +
+    '<button class="master-btn ' + (i.mastered ? "on" : "") + '" data-master="' + i.id + '">' + (i.mastered ? "✓ 習得済み" : "習得済みにする") + "</button></li>"
+  ).join("") : '<li class="item"><span></span><span class="label">該当する項目がありません</span></li>';
+  document.querySelectorAll("[data-on]").forEach(cb => cb.onchange = () => { items.find(i => i.id === cb.dataset.on).on = cb.checked; renderSelect(); });
+  document.querySelectorAll("[data-master]").forEach(b => b.onclick = () => { const x = items.find(i => i.id === b.dataset.master); x.mastered = !x.mastered; renderSelect(); });
+}
+$("#search").oninput = e => { query = e.target.value; renderSelect(); };
+$("#all-on").onclick = () => { items.filter(i => i.ci === curCat).forEach(i => i.on = true); renderSelect(); };
+$("#all-off").onclick = () => { items.filter(i => i.ci === curCat).forEach(i => i.on = false); renderSelect(); };
+$("#opt-skip-master").onchange = renderSelect;
+$("#start").onclick = () => { startSession(); show("practice"); };
+
+/* ---------- practice ---------- */
+let S = null; // session
+function startSession() {
+  let q = items.filter(isActive);
+  if ($("#opt-shuffle").checked) q = q.sort(() => Math.random() - .5);
+  S = { queue: q, total: q.length, idx: 0, correct: 0, wrong: 0, streak: 0, best: 0, mastered: 0, step: 0, locked: false, hint: false, shown: false, last: [], missed: new Set() };
+  items.forEach(i => i.miss = 0);
+}
+const cur = () => S && S.queue[S.idx];
+
+function renderPractice() {
+  const el = $("#practice");
+  if (!S) startSession();
+  if (!S.total) {
+    el.innerHTML = '<div class="card empty-state"><h2>練習できる項目がありません</h2><p>「① 項目を選ぶ」で出題する項目にチェックを入れてください。</p><button class="btn primary" onclick="show(\'select\')">項目を選ぶ</button></div>';
+    return;
+  }
+  const it = cur();
+  if (!it) { show("result"); return; }
+  const pct = Math.round(S.idx / S.total * 100);
+  const seq = it.k.includes(">");
+  const parts = it.k.split(seq ? ">" : "+");
+  el.innerHTML =
+    '<div class="progress-row"><span>' + (S.idx + 1) + " / " + S.total + '</span><div class="progress"><i style="width:' + pct + '%"></i></div><button class="btn sm" id="finish">終了して結果を見る</button></div>' +
+    '<div class="chips"><span class="chip">正解 <b>' + S.correct + '</b></span><span class="chip">ミス <b>' + S.wrong + '</b></span><span class="chip">連続正解 <b>' + S.streak + '</b></span><span class="chip">除外した項目 <b>' + S.mastered + "</b></span></div>" +
+    '<div class="card quiz" id="quiz">' +
+    '<span class="cat-tag">' + esc(it.cat) + "</span>" +
+    '<div class="q">' + esc(it.q) + "</div>" +
+    '<div class="note">' + (seq ? "順番にキーを押してください" : "キーを同時に押してください") + (it.note ? "（" + esc(it.note) + "）" : "") + "</div>" +
+    '<div class="answer-area" id="answer"></div>' +
+    '<div class="feedback" id="feedback"></div>' +
+    '<div class="actions">' +
+    '<button class="btn" id="b-hint">💡 ヒント</button>' +
+    '<button class="btn" id="b-show">答えを見る</button>' +
+    '<button class="btn" id="b-skip">スキップ →</button>' +
+    '<button class="btn ok" id="b-master">✓ できる！練習から外す</button></div>' +
+    '<div class="hintbox"><b>メモ：</b>Windowsキー系や Ctrl+T / Ctrl+W など、ブラウザや OS が先に処理するキーは本物のキー入力では判定できないことがあります。その場合は「答えを見る」で確認してください（デスクトップアプリ版では全キーを取得予定）。</div>' +
+    "</div>";
+  S.step = 0; S.locked = false; S.hint = false; S.shown = false; S.last = [];
+  drawAnswer();
+  $("#finish").onclick = () => show("result");
+  $("#b-hint").onclick = () => { S.hint = true; drawAnswer(); fb("ヒント：最初のキーは「" + (LABEL[parts[0]] || parts[0]) + "」です", "hint"); };
+  $("#b-show").onclick = () => { S.shown = true; drawAnswer(); fb("答え：" + parts.map(p => LABEL[p] || p).join(seq ? " → " : " + "), "hint"); S.missed.add(it); };
+  $("#b-skip").onclick = () => next();
+  $("#b-master").onclick = () => { it.mastered = true; S.mastered++; S.queue.splice(S.idx, 1); S.total--; if (!cur()) { show("result"); } else renderPractice(); };
+}
+function fb(msg, cls) { const f = $("#feedback"); if (f) { f.className = "feedback " + cls; f.textContent = msg; } }
+function drawAnswer() {
+  const it = cur(); if (!it) return;
+  const seq = it.k.includes(">");
+  const parts = it.k.split(seq ? ">" : "+");
+  let html;
+  if (S.shown) html = keysHTML(it.k, "big hit");
+  else if (S.hint) html = '<span class="keys"><span class="key big hit">' + esc(LABEL[parts[0]] || parts[0]) + "</span>" + parts.slice(1).map(() => (seq ? '<span class="arrow">→</span>' : '<span class="plus">+</span>') + '<span class="key big empty">?</span>').join("") + "</span>";
+  else if (S.last.length) html = '<span class="keys">' + S.last.map(p => '<span class="key big ' + p.cls + '">' + esc(LABEL[p.k] || p.k) + "</span>").join(seq ? '<span class="arrow">→</span>' : '<span class="plus">+</span>') + "</span>";
+  else html = '<span class="keys"><span class="key big empty">キーを押す…</span></span>';
+  $("#answer").innerHTML = html;
+}
+function next() { S.idx++; renderPractice(); }
+
+/* key capture */
+const MAP = { ArrowLeft: "←", ArrowRight: "→", ArrowUp: "↑", ArrowDown: "↓", " ": "Space", Escape: "Esc", Meta: "Win", Control: "Ctrl", Delete: "Delete", Enter: "Enter" };
+const norm = k => MAP[k] || (k.length === 1 ? k.toUpperCase() : k);
+document.addEventListener("keydown", e => {
+  if (!$("#view-practice").classList.contains("active") || !S || !cur() || S.locked || e.target.matches("input,textarea")) return;
+  if (e.key === "Tab" || e.key.startsWith("F") && e.key.length <= 3 || e.ctrlKey || e.altKey || e.metaKey) e.preventDefault();
+  const it = cur(); const seq = it.k.includes(">");
+  const parts = it.k.split(seq ? ">" : "+");
+  const key = norm(e.key);
+  if (seq) {
+    if (key === parts[S.step]) { S.step++; S.last.push({ k: key, cls: "hit" }); drawAnswer(); if (S.step === parts.length) return good(it); }
+    else if (["Shift", "Ctrl", "Win"].includes(key)) return;
+    else { S.last.push({ k: key, cls: "miss" }); drawAnswer(); return bad(it, true); }
+    return;
+  }
+  const mods = [e.metaKey && "Win", e.ctrlKey && "Ctrl", e.altKey && "Alt", e.shiftKey && "Shift"].filter(Boolean);
+  const isMod = ["Win", "Ctrl", "Alt", "Shift"].includes(key);
+  const pressed = isMod ? mods : mods.concat(key);
+  S.last = pressed.map(k => ({ k, cls: parts.includes(k) ? "hit" : "miss" }));
+  drawAnswer();
+  const need = new Set(parts);
+  const ok = pressed.length === need.size && pressed.every(p => need.has(p));
+  if (ok) good(it);
+  else if (!isMod || !pressed.every(p => need.has(p))) { if (!isMod) bad(it, false); }
+});
+function good(it) {
+  S.locked = true; S.correct++; S.streak++; S.best = Math.max(S.best, S.streak);
+  $("#quiz").classList.add("ok"); fb("正解！ 🎉", "ok");
+  setTimeout(next, 750);
+}
+function bad(it, reset) {
+  S.wrong++; S.streak = 0; it.miss++; S.missed.add(it); S.step = 0;
+  const q = $("#quiz"); q.classList.remove("ng"); void q.offsetWidth; q.classList.add("ng");
+  fb("ちがうみたい… もう一度！", "ng");
+  if (reset) setTimeout(() => { S.last = []; if (cur() === it) drawAnswer(); }, 700);
+}
+
+/* ---------- result ---------- */
+function renderResult() {
+  const el = $("#result");
+  if (!S) { el.innerHTML = '<div class="empty-state"><h2>まだ練習していません</h2><p>「② 練習する」から始めましょう。</p></div>'; return; }
+  const answered = S.correct + S.wrong;
+  const rate = answered ? Math.round(S.correct / answered * 100) : 0;
+  const missed = [...S.missed];
+  el.innerHTML =
+    "<h2>お疲れさまでした！</h2><div style='color:var(--muted);font-size:14px'>今回のセッションの結果</div>" +
+    '<div class="grid3"><div class="cell"><b>' + rate + '%</b><span>正答率</span></div><div class="cell"><b>' + S.best + '</b><span>最高連続正解</span></div><div class="cell"><b>' + S.mastered + "</b><span>今回外した項目</span></div></div>" +
+    "<h3>苦手なショートカット（もう一度練習しよう）</h3>" +
+    (missed.length ? '<ul class="misslist">' + missed.map(i => '<li><span class="label">' + esc(i.q) + "</span>" + keysHTML(i.k) + (i.miss ? '<span class="badge miss">ミス ' + i.miss + "</span>" : "") + "</li>").join("") + "</ul>" : '<div style="color:var(--muted);font-size:14px">ミスした項目はありません。</div>') +
+    '<div class="actions" style="justify-content:flex-start;margin-top:22px"><button class="btn primary" id="r-miss"' + (missed.length ? "" : " disabled") + '>苦手だけもう一度</button><button class="btn" id="r-again">同じ設定でもう一度</button><button class="btn" id="r-select">項目を選び直す</button></div>';
+  $("#r-miss").onclick = () => { const m = missed; startSession(); S.queue = m.slice(); S.total = m.length; show("practice"); };
+  $("#r-again").onclick = () => { startSession(); show("practice"); };
+  $("#r-select").onclick = () => show("select");
+}
+
+renderSelect();
+</script>
+</body>
+</html>
